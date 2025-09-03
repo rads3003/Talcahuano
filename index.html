@@ -1,198 +1,163 @@
-<!DOCTYPE html>
-<html lang="es">
+<!-- Estructura base del formulario -->
+<div id="formularioSLIS">
+  <!-- Portada ejecutiva -->
+  <div class="portada-ejecutiva">
+    <h1>Informe de Vulnerabilidad</h1>
+    <h2>SLIS v6.0</h2>
+    <p><strong>Sitio:</strong> <span id="informeSitio"></span></p>
+    <p><strong>Fecha:</strong> <span id="informeFecha"></span></p>
+    <p><strong>Responsable:</strong> <span id="informeResponsable"></span></p>
+  </div>
 
-<head>
-  <meta charset="UTF-8">
-  <title>SLIS v6.0 - Informe de Vulnerabilidad</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
-    }
+  <!-- Sección PRT -->
+  <section id="PRT">
+    <!-- Campos originales + mejora de imagen -->
+    <label>Descripción del entorno:</label>
+    <textarea id="entorno"></textarea>
 
-    .formulario,
-    #informeCompleto {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
-    }
+    <label>Fotografía del entorno:</label>
+    <input type="file" id="fotoEntorno" accept="image/*" onchange="mostrarImagen(event, 'previewEntorno')">
+    <div id="previewEntorno" class="preview-imagen"></div>
+  </section>
 
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
+  <!-- Sección INFMEJ -->
+  <section id="INFMEJ">
+    <label>Activos vulnerables:</label>
+    <textarea id="activos"></textarea>
 
-    input[type="text"],
-    textarea,
-    input[type="file"] {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
+    <label>Fotografía de activos:</label>
+    <input type="file" id="fotoActivos" accept="image/*" onchange="mostrarImagen(event, 'previewActivos')">
+    <div id="previewActivos" class="preview-imagen"></div>
+  </section>
 
-    .portada-ejecutiva {
-      background-color: #001f3f;
-      color: white;
-      padding: 40px;
-      text-align: center;
-      border-radius: 8px;
-      margin-bottom: 30px;
-    }
+  <!-- Sección INDVL -->
+  <section id="INDVL">
+    <label>Hallazgos:</label>
+    <textarea id="hallazgos"></textarea>
 
-    .portada-ejecutiva h1 {
-      font-size: 36px;
-      margin-bottom: 10px;
-    }
+    <label>Riesgos:</label>
+    <textarea id="riesgos"></textarea>
 
-    .portada-ejecutiva h2 {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
+    <label>Recomendaciones:</label>
+    <textarea id="recomendaciones"></textarea>
 
-    .preview-imagen img,
-    .imagen-informe {
-      max-width: 100%;
-      height: auto;
-      margin-top: 10px;
-      border-radius: 6px;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-    }
-
-    p,
-    td,
-    th {
-      text-align: justify;
-    }
-
-    button {
-      padding: 10px 20px;
-      background-color: #001f3f;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- FORMULARIO -->
-  <div class="formulario" id="formularioSLIS">
-    <h2>Formulario de Vulnerabilidad</h2>
-
-    <label for="sitio">Nombre del sitio:</label>
-    <input type="text" id="sitio">
-
-    <label for="responsable">Responsable del informe:</label>
-    <input type="text" id="responsable">
-
-    <label for="hallazgo">Descripción del hallazgo:</label>
-    <textarea id="hallazgo"></textarea>
-
-    <label for="riesgo">Riesgo asociado:</label>
-    <textarea id="riesgo"></textarea>
-
-    <label for="recomendacion">Recomendación:</label>
-    <textarea id="recomendacion"></textarea>
-
-    <label for="fotoHallazgo">Fotografía del hallazgo:</label>
+    <label>Fotografía del hallazgo:</label>
     <input type="file" id="fotoHallazgo" accept="image/*" onchange="mostrarImagen(event, 'previewHallazgo')">
     <div id="previewHallazgo" class="preview-imagen"></div>
+  </section>
 
-    <button onclick="generarInforme()">Generar Informe</button>
-  </div>
+  <!-- Botón para generar informe -->
+  <button onclick="generarInforme()">Generar Informe</button>
+</div>
 
-  <!-- INFORME -->
-  <div id="informeCompleto" style="display:none;">
-    <div class="portada-ejecutiva">
-      <h1>Informe de Vulnerabilidad</h1>
-      <h2>SLIS v6.0</h2>
-      <p><strong>Sitio:</strong> <span id="informeSitio"></span></p>
-      <p><strong>Fecha:</strong> <span id="informeFecha"></span></p>
-      <p><strong>Responsable:</strong> <span id="informeResponsable"></span></p>
-    </div>
+<!-- Contenedor del informe generado -->
+<div id="informeCompleto" style="display:none;">
+  <!-- Aquí se renderiza todo el contenido del informe -->
+  <div id="contenidoInforme"></div>
+  <button onclick="descargarPDF()">Descargar PDF</button>
+</div>
+body {
+font-family: 'Montserrat', sans-serif;
+background-color: #f4f4f4;
+margin: 20px;
+}
+.portada-ejecutiva {
+background-color: #001f3f;
+color: white;
+padding: 40px;
+text-align: center;
+border-radius: 8px;
+margin-bottom: 30px;
+}
+.portada-ejecutiva h1 {
+font-size: 36px;
+}
+.portada-ejecutiva h2 {
+font-size: 24px;
+}
+.preview-imagen img,
+.imagen-informe {
+max-width: 100%;
+height: auto;
+margin-top: 10px;
+border-radius: 6px;
+box-shadow: 0 0 6px rgba(0,0,0,0.2);
+}
+p, td, th, textarea {
+text-align: justify;
+}
+button {
+padding: 10px 20px;
+background-color: #001f3f;
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+margin-top: 20px;
+}
 
-    <h3>Hallazgo</h3>
-    <p id="informeHallazgo"></p>
-    <div id="imagenHallazgo" class="preview-imagen"></div>
+<script>
+  const imagenes = {};
 
-    <h3>Riesgo Asociado</h3>
-    <p id="informeRiesgo"></p>
+  function mostrarImagen(event, contenedorId) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imagenes[contenedorId] = e.target.result;
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      img.className = "imagen-informe";
+      document.getElementById(contenedorId).innerHTML = "";
+      document.getElementById(contenedorId).appendChild(img);
+    };
+    if (file) reader.readAsDataURL(file);
+  }
 
-    <h3>Recomendación</h3>
-    <p id="informeRecomendacion"></p>
+  function generarInforme() {
+    const sitio = document.getElementById("sitio")?.value || "Sin especificar";
+    const responsable = document.getElementById("responsable")?.value || "Sin responsable";
+    const fecha = new Date().toLocaleDateString();
 
-    <button onclick="descargarPDF()">Descargar PDF</button>
-  </div>
+    const entorno = document.getElementById("entorno")?.value || "";
+    const activos = document.getElementById("activos")?.value || "";
+    const hallazgos = document.getElementById("hallazgos")?.value || "";
+    const riesgos = document.getElementById("riesgos")?.value || "";
+    const recomendaciones = document.getElementById("recomendaciones")?.value || "";
 
-  <script>
-    let imagenBase64 = "";
+    document.getElementById("informeSitio").innerText = sitio;
+    document.getElementById("informeResponsable").innerText = responsable;
+    document.getElementById("informeFecha").innerText = fecha;
 
-    function mostrarImagen(event, contenedorId) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        imagenBase64 = e.target.result;
-        const img = document.createElement("img");
-        img.src = imagenBase64;
-        img.className = "imagen-informe";
-        document.getElementById(contenedorId).innerHTML = "";
-        document.getElementById(contenedorId).appendChild(img);
-      };
-      if (file) reader.readAsDataURL(file);
-    }
+    let html = `
+      <h3>Entorno</h3><p>${entorno}</p>${imagenHTML('previewEntorno')}
+      <h3>Activos Vulnerables</h3><p>${activos}</p>${imagenHTML('previewActivos')}
+      <h3>Hallazgos</h3><p>${hallazgos}</p>${imagenHTML('previewHallazgo')}
+      <h3>Riesgos</h3><p>${riesgos}</p>
+      <h3>Recomendaciones</h3><p>${recomendaciones}</p>
+    `;
 
-    function generarInforme() {
-      const sitio = document.getElementById("sitio").value;
-      const responsable = document.getElementById("responsable").value;
-      const hallazgo = document.getElementById("hallazgo").value;
-      const riesgo = document.getElementById("riesgo").value;
-      const recomendacion = document.getElementById("recomendacion").value;
-      const fecha = new Date().toLocaleDateString();
+    document.getElementById("contenidoInforme").innerHTML = html;
+    document.getElementById("formularioSLIS").style.display = "none";
+    document.getElementById("informeCompleto").style.display = "block";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
 
-      document.getElementById("informeSitio").innerText = sitio;
-      document.getElementById("informeResponsable").innerText = responsable;
-      document.getElementById("informeFecha").innerText = fecha;
-      document.getElementById("informeHallazgo").innerText = hallazgo;
-      document.getElementById("informeRiesgo").innerText = riesgo;
-      document.getElementById("informeRecomendacion").innerText = recomendacion;
+  function imagenHTML(id) {
+    return imagenes[id] ? `<img src="${imagenes[id]}" class="imagen-informe">` : "";
+  }
 
-      if (imagenBase64) {
-        const img = document.createElement("img");
-        img.src = imagenBase64;
-        img.className = "imagen-informe";
-        document.getElementById("imagenHallazgo").innerHTML = "";
-        document.getElementById("imagenHallazgo").appendChild(img);
-      }
-
-      document.getElementById("formularioSLIS").style.display = "none";
-      document.getElementById("informeCompleto").style.display = "block";
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
-
-    function descargarPDF() {
-      const elemento = document.getElementById("informeCompleto");
-      const opciones = {
-        margin: 0.5,
-        filename: 'informe_SLIS.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
-      html2pdf().set(opciones).from(elemento).save();
-    }
-  </script>
-
+  function descargarPDF() {
+    const elemento = document.getElementById("informeCompleto");
+    const opciones = {
+      margin: 0.5,
+      filename: 'informe_SLIS.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opciones).from(elemento).save();
+  }
+</script>
 </body>
 
 </html>
