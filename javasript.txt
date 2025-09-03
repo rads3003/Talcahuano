@@ -1,0 +1,60 @@
+const imagenes = {};
+
+function mostrarImagen(event, contenedorId) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    imagenes[contenedorId] = e.target.result;
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.className = "imagen-informe";
+    document.getElementById(contenedorId).innerHTML = "";
+    document.getElementById(contenedorId).appendChild(img);
+  };
+  if (file) reader.readAsDataURL(file);
+}
+
+function generarInforme() {
+  const sitio = document.getElementById("sitio")?.value || "Sin especificar";
+  const responsable = document.getElementById("responsable")?.value || "Sin responsable";
+  const fecha = new Date().toLocaleDateString();
+
+  const entorno = document.getElementById("entorno")?.value || "";
+  const activos = document.getElementById("activos")?.value || "";
+  const hallazgos = document.getElementById("hallazgos")?.value || "";
+  const riesgos = document.getElementById("riesgos")?.value || "";
+  const recomendaciones = document.getElementById("recomendaciones")?.value || "";
+
+  document.getElementById("informeSitio").innerText = sitio;
+  document.getElementById("informeResponsable").innerText = responsable;
+  document.getElementById("informeFecha").innerText = fecha;
+
+  let html = `
+    <h3>Entorno</h3><p>${entorno}</p>${imagenHTML('previewEntorno')}
+    <h3>Activos Vulnerables</h3><p>${activos}</p>${imagenHTML('previewActivos')}
+    <h3>Hallazgos</h3><p>${hallazgos}</p>${imagenHTML('previewHallazgo')}
+    <h3>Riesgos</h3><p>${riesgos}</p>
+    <h3>Recomendaciones</h3><p>${recomendaciones}</p>
+  `;
+
+  document.getElementById("contenidoInforme").innerHTML = html;
+  document.getElementById("formularioSLIS").style.display = "none";
+  document.getElementById("informeCompleto").style.display = "block";
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function imagenHTML(id) {
+  return imagenes[id] ? `<img src="${imagenes[id]}" class="imagen-informe">` : "";
+}
+
+function descargarPDF() {
+  const elemento = document.getElementById("informeCompleto");
+  const opciones = {
+    margin: 0.5,
+    filename: 'Informe_SLIS.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opciones).from(elemento).save();
+}
