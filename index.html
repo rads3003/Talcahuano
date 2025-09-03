@@ -5,11 +5,37 @@
   <meta charset="UTF-8">
   <title>SLIS v6.0 - Informe de Vulnerabilidad</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
       margin: 20px;
       background-color: #f4f4f4;
+    }
+
+    .formulario,
+    #informeCompleto {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
 
     .portada-ejecutiva {
@@ -31,30 +57,6 @@
       margin-bottom: 20px;
     }
 
-    .formulario {
-      background: white;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    textarea,
-    input[type="file"],
-    input[type="text"] {
-      width: 100%;
-      margin-top: 5px;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-
     .preview-imagen img,
     .imagen-informe {
       max-width: 100%;
@@ -68,12 +70,6 @@
     td,
     th {
       text-align: justify;
-    }
-
-    #informeCompleto {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
     }
 
     button {
@@ -90,7 +86,7 @@
 
 <body>
 
-  <!-- FORMULARIO COMPLETO -->
+  <!-- FORMULARIO -->
   <div class="formulario" id="formularioSLIS">
     <h2>Formulario de Vulnerabilidad</h2>
 
@@ -100,8 +96,14 @@
     <label for="responsable">Responsable del informe:</label>
     <input type="text" id="responsable">
 
-    <label for="descripcion">Descripción del hallazgo:</label>
-    <textarea id="descripcion"></textarea>
+    <label for="hallazgo">Descripción del hallazgo:</label>
+    <textarea id="hallazgo"></textarea>
+
+    <label for="riesgo">Riesgo asociado:</label>
+    <textarea id="riesgo"></textarea>
+
+    <label for="recomendacion">Recomendación:</label>
+    <textarea id="recomendacion"></textarea>
 
     <label for="fotoHallazgo">Fotografía del hallazgo:</label>
     <input type="file" id="fotoHallazgo" accept="image/*" onchange="mostrarImagen(event, 'previewHallazgo')">
@@ -120,67 +122,77 @@
       <p><strong>Responsable:</strong> <span id="informeResponsable"></span></p>
     </div>
 
-    <h3>Hallazgos</h3>
-    <p id="textoHallazgo"></p>
+    <h3>Hallazgo</h3>
+    <p id="informeHallazgo"></p>
     <div id="imagenHallazgo" class="preview-imagen"></div>
+
+    <h3>Riesgo Asociado</h3>
+    <p id="informeRiesgo"></p>
+
+    <h3>Recomendación</h3>
+    <p id="informeRecomendacion"></p>
 
     <button onclick="descargarPDF()">Descargar PDF</button>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     let imagenBase64 = "";
 
-  function mostrarImagen(event, contenedorId) {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      imagenBase64 = e.target.result;
-      const img = document.createElement("img");
-      img.src = imagenBase64;
-      img.className = "imagen-informe";
-      document.getElementById(contenedorId).innerHTML = "";
-      document.getElementById(contenedorId).appendChild(img);
-    };
-    if (file) reader.readAsDataURL(file);
-  }
-
-  function generarInforme() {
-    const sitio = document.getElementById("sitio").value;
-    const responsable = document.getElementById("responsable").value;
-    const descripcion = document.getElementById("descripcion").value;
-    const fecha = new Date().toLocaleDateString();
-
-    document.getElementById("informeSitio").innerText = sitio;
-    document.getElementById("informeResponsable").innerText = responsable;
-    document.getElementById("informeFecha").innerText = fecha;
-    document.getElementById("textoHallazgo").innerText = descripcion;
-
-    if (imagenBase64) {
-      const img = document.createElement("img");
-      img.src = imagenBase64;
-      img.className = "imagen-informe";
-      document.getElementById("imagenHallazgo").innerHTML = "";
-      document.getElementById("imagenHallazgo").appendChild(img);
+    function mostrarImagen(event, contenedorId) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagenBase64 = e.target.result;
+        const img = document.createElement("img");
+        img.src = imagenBase64;
+        img.className = "imagen-informe";
+        document.getElementById(contenedorId).innerHTML = "";
+        document.getElementById(contenedorId).appendChild(img);
+      };
+      if (file) reader.readAsDataURL(file);
     }
 
-    document.getElementById("formularioSLIS").style.display = "none";
-    document.getElementById("informeCompleto").style.display = "block";
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }
+    function generarInforme() {
+      const sitio = document.getElementById("sitio").value;
+      const responsable = document.getElementById("responsable").value;
+      const hallazgo = document.getElementById("hallazgo").value;
+      const riesgo = document.getElementById("riesgo").value;
+      const recomendacion = document.getElementById("recomendacion").value;
+      const fecha = new Date().toLocaleDateString();
 
-  function descargarPDF() {
-    const elemento = document.getElementById("informeCompleto");
-    const opciones = {
-      margin: 0.5,
-      filename: 'informe_SLIS.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opciones).from(elemento).save();
-  }
+      document.getElementById("informeSitio").innerText = sitio;
+      document.getElementById("informeResponsable").innerText = responsable;
+      document.getElementById("informeFecha").innerText = fecha;
+      document.getElementById("informeHallazgo").innerText = hallazgo;
+      document.getElementById("informeRiesgo").innerText = riesgo;
+      document.getElementById("informeRecomendacion").innerText = recomendacion;
+
+      if (imagenBase64) {
+        const img = document.createElement("img");
+        img.src = imagenBase64;
+        img.className = "imagen-informe";
+        document.getElementById("imagenHallazgo").innerHTML = "";
+        document.getElementById("imagenHallazgo").appendChild(img);
+      }
+
+      document.getElementById("formularioSLIS").style.display = "none";
+      document.getElementById("informeCompleto").style.display = "block";
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function descargarPDF() {
+      const elemento = document.getElementById("informeCompleto");
+      const opciones = {
+        margin: 0.5,
+        filename: 'informe_SLIS.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opciones).from(elemento).save();
+    }
   </script>
+
 </body>
 
 </html>
