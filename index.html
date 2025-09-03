@@ -2,219 +2,167 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
-  <title>Plataforma Carrera Urbana</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="UTF-8">
+  <title>SLIS v6.0 - Informe de Vulnerabilidad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #111;
-      color: #eee;
+      font-family: 'Montserrat', sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
     }
 
-    .pantalla {
-      display: none;
+    .portada-ejecutiva {
+      background-color: #001f3f;
+      color: white;
+      padding: 40px;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .portada-ejecutiva h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .portada-ejecutiva h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .item-formulario {
+      background: white;
       padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
     }
 
-    .visible {
+    label {
       display: block;
-    }
-
-    button {
-      background-color: #00ff99;
-      color: #111;
-      border: none;
-      padding: 10px;
       margin-top: 10px;
-      cursor: pointer;
       font-weight: bold;
     }
 
-    button:hover {
-      background-color: #00cc77;
-    }
-
-    input {
+    textarea,
+    input[type="file"] {
       width: 100%;
-      padding: 8px;
       margin-top: 5px;
-      background-color: #222;
-      color: #eee;
-      border: 1px solid #555;
     }
 
-    #map {
-      height: 60vh;
-      width: 100%;
+    .preview-imagen img,
+    .imagen-informe {
+      max-width: 100%;
+      height: auto;
       margin-top: 10px;
-      border: 2px solid #00ff99;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
     }
 
-    #panel {
-      background-color: #1a1a1a;
-      padding: 10px;
-      margin-top: 10px;
-      border: 1px solid #333;
+    p,
+    td,
+    th {
+      text-align: justify;
     }
 
-    .log-entry {
-      font-size: 0.85em;
-      margin-bottom: 5px;
-      color: #ccc;
+    #informeCompleto {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
     }
 
-    .log-entry strong {
-      color: #00ff99;
-    }
-
-    .participante-box {
-      padding: 5px;
-      margin: 5px 0;
-      background-color: #222;
-      border-left: 5px solid #00ff99;
+    button {
+      padding: 10px 20px;
+      background-color: #001f3f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Pantalla de inscripción -->
-  <div id="pantalla-registro" class="pantalla visible">
-    <h2>🏁 Inscripción de Participantes</h2>
-    <label>Nombre del participante:</label>
-    <input type="text" id="nombre" placeholder="Ej: Rodrigo Pérez" />
-    <button onclick="registrar()">Registrar y seguir</button>
-    <div id="lista"></div>
+  <!-- FORMULARIO -->
+  <div class="item-formulario">
+    <label for="descripcion">Descripción del hallazgo:</label>
+    <textarea id="descripcion" name="descripcion"></textarea>
+
+    <label for="fotoHallazgo">Fotografía del hallazgo:</label>
+    <input type="file" id="fotoHallazgo" accept="image/*" onchange="mostrarImagen(event, 'previewHallazgo')">
+
+    <div id="previewHallazgo" class="preview-imagen"></div>
+
+    <button onclick="generarInforme()">Generar Informe</button>
   </div>
 
-  <!-- Pantalla de seguimiento -->
-  <div id="pantalla-seguimiento" class="pantalla">
-    <h2>📍 Seguimiento en Tiempo Real</h2>
-    <div id="map"></div>
-
-    <div id="panel">
-      <h3>Agregar Hito Manual</h3>
-      <label>Nombre del hito:</label>
-      <input type="text" id="hito-nombre" />
-      <label>Latitud:</label>
-      <input type="number" id="hito-lat" step="any" />
-      <label>Longitud:</label>
-      <input type="number" id="hito-lon" step="any" />
-      <button onclick="agregarHito()">Agregar Hito</button>
-
-      <h3>Avances</h3>
-      <div id="log"></div>
+  <!-- INFORME -->
+  <div id="informeCompleto" style="display:none;">
+    <div class="portada-ejecutiva">
+      <h1>Informe de Vulnerabilidad</h1>
+      <h2>SLIS v6.0</h2>
+      <p><strong>Sitio:</strong> Instalación Central</p>
+      <p><strong>Fecha:</strong> 03/09/2025</p>
+      <p><strong>Responsable:</strong> Rodrigo</p>
     </div>
+
+    <h3>Hallazgos</h3>
+    <p id="textoHallazgo"></p>
+    <div id="imagenHallazgo" class="preview-imagen"></div>
+
+    <button onclick="descargarPDF()">Descargar PDF</button>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- LIBRERÍA PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <script>
-    let contador = 1;
-    const participantes = {};
-    const colores = ["#00ff99", "#ff4444", "#3399ff", "#ffcc00", "#cc66ff"];
-    const hitos = [];
-    const map = L.map("map").setView([-33.4372, -70.6506], 15);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
-    }).addTo(map);
+    let imagenBase64 = "";
 
-    function registrar() {
-      const nombre = document.getElementById("nombre").value.trim();
-      if (!nombre) return;
+  function mostrarImagen(event, contenedorId) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imagenBase64 = e.target.result;
+      const img = document.createElement("img");
+      img.src = imagenBase64;
+      img.className = "imagen-informe";
+      document.getElementById(contenedorId).innerHTML = "";
+      document.getElementById(contenedorId).appendChild(img);
+    };
+    if (file) reader.readAsDataURL(file);
+  }
 
-      const id = "P" + String(contador).padStart(3, "0");
-      const color = colores[(contador - 1) % colores.length];
-      const marker = L.circleMarker([0, 0], {
-        radius: 10,
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.9,
-      }).addTo(map).bindPopup(`${id} - ${nombre}`);
+  function generarInforme() {
+    const descripcion = document.getElementById("descripcion").value;
+    document.getElementById("textoHallazgo").innerText = descripcion;
 
-      participantes[id] = {
-        nombre,
-        color,
-        marker,
-        hitosCumplidos: new Set(),
-        log: [],
-      };
-
-      const box = document.createElement("div");
-      box.className = "participante-box";
-      box.innerHTML = `<strong>${id}</strong> - ${nombre}`;
-      document.getElementById("lista").appendChild(box);
-
-      contador++;
-      document.getElementById("nombre").value = "";
-
-      document.getElementById("pantalla-registro").classList.remove("visible");
-      document.getElementById("pantalla-seguimiento").classList.add("visible");
-
-      iniciarGPS(id);
+    if (imagenBase64) {
+      const img = document.createElement("img");
+      img.src = imagenBase64;
+      img.className = "imagen-informe";
+      document.getElementById("imagenHallazgo").innerHTML = "";
+      document.getElementById("imagenHallazgo").appendChild(img);
     }
 
-    function iniciarGPS(id) {
-      navigator.geolocation.watchPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          const p = participantes[id];
-          p.marker.setLatLng([lat, lon]);
-          map.setView([lat, lon]);
+    document.getElementById("informeCompleto").style.display = "block";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
 
-          hitos.forEach((hito) => {
-            const d = distanciaMetros(lat, lon, hito.lat, hito.lon);
-            if (d < 20 && !p.hitosCumplidos.has(hito.nombre)) {
-              p.hitosCumplidos.add(hito.nombre);
-              const entry = document.createElement("div");
-              entry.className = "log-entry";
-              entry.innerHTML = `✅ <strong>${id}</strong> (${p.nombre}) alcanzó <strong>${hito.nombre}</strong>`;
-              document.getElementById("log").appendChild(entry);
-            }
-          });
-        },
-        () => {
-          console.log("No se pudo obtener la ubicación.");
-        },
-        { enableHighAccuracy: true }
-      );
-    }
-
-    function distanciaMetros(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const φ1 = lat1 * Math.PI / 180;
-      const φ2 = lat2 * Math.PI / 180;
-      const Δφ = (lat2 - lat1) * Math.PI / 180;
-      const Δλ = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) * Math.sin(Δλ/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    function agregarHito() {
-      const nombre = document.getElementById("hito-nombre").value;
-      const lat = parseFloat(document.getElementById("hito-lat").value);
-      const lon = parseFloat(document.getElementById("hito-lon").value);
-      if (!nombre || isNaN(lat) || isNaN(lon)) return;
-
-      hitos.push({ nombre, lat, lon });
-
-      L.circle([lat, lon], {
-        radius: 15,
-        color: "#ff0000",
-        fillColor: "#ff0000",
-        fillOpacity: 0.5,
-      }).bindPopup(nombre).addTo(map);
-
-      document.getElementById("hito-nombre").value = "";
-      document.getElementById("hito-lat").value = "";
-      document.getElementById("hito-lon").value = "";
-    }
+  function descargarPDF() {
+    const elemento = document.getElementById("informeCompleto");
+    const opciones = {
+      margin: 0.5,
+      filename: 'informe_SLIS.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opciones).from(elemento).save();
+  }
   </script>
 </body>
 
