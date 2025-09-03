@@ -3,664 +3,205 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Levantamiento y Generación de Informes de Vulnerabilidad (SLIS v6.1 - Mejorado)</title>
+  <title>SLIS v6.0 - Informe de Vulnerabilidad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    :root {
-      --primary-color: #002b4e;
-      --secondary-color: #007bff;
-      --light-gray: #f0f2f5;
-      --border-color: #ccc;
-      --header-bg: #0d1b2a;
-      --section-header-bg: #e9ecef;
-      --danger-color: #dc3545;
-      --success-color: #28a745;
-    }
-
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      margin: 0;
-      background-color: var(--light-gray);
-      color: #333;
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f4f4f4;
+      margin: 20px;
     }
 
-    .container {
-      max-width: 1300px;
-      margin: 20px auto;
+    .formulario,
+    #informeCompleto {
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .header {
-      background: var(--header-bg);
-      color: white;
-      padding: 25px;
-      text-align: center;
-    }
-
-    .header img {
-      height: 40px;
-      margin-bottom: 10px;
-      filter: brightness(0) invert(1);
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
-
-    .header p {
-      margin: 5px 0 0;
-      opacity: 0.8;
-      font-size: 14px;
-    }
-
-    form {
-      padding: 20px 40px 40px 40px;
-    }
-
-    .section-header {
-      background: var(--section-header-bg);
-      color: var(--primary-color);
-      padding: 12px 20px;
-      margin: 35px 0 20px;
-      border-radius: 6px;
-      font-weight: bold;
-      border-left: 5px solid var(--secondary-color);
-      font-size: 18px;
-    }
-
-    .form-group {
-      margin-bottom: 22px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
     }
 
     label {
       display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #444;
-      font-size: 14px;
+      margin-top: 10px;
+      font-weight: bold;
     }
 
     input[type="text"],
-    input[type="date"],
-    input[type="number"],
-    input[type="file"],
-    select,
-    textarea {
+    textarea,
+    input[type="file"] {
       width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
-      box-sizing: border-box;
-      transition: border-color 0.3s, box-shadow 0.3s;
-      font-size: 15px;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
 
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--secondary-color);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    .portada-ejecutiva {
+      background-color: #001f3f;
+      color: white;
+      padding: 40px;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 30px;
     }
 
+    .portada-ejecutiva h1 {
+      font-size: 36px;
+    }
+
+    .portada-ejecutiva h2 {
+      font-size: 24px;
+    }
+
+    .preview-imagen img,
+    .imagen-informe {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    }
+
+    p,
+    td,
+    th,
     textarea {
-      min-height: 100px;
-      resize: vertical;
+      text-align: justify;
     }
 
     button {
-      color: white;
       padding: 10px 20px;
+      background-color: #001f3f;
+      color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 15px;
-      transition: background-color 0.3s;
-      margin-top: 10px;
-      font-weight: 600;
-    }
-
-    .main-btn {
-      background: var(--secondary-color);
-      font-size: 18px;
-      padding: 15px 30px;
-      width: 100%;
-      margin-top: 30px;
-    }
-
-    .main-btn:hover {
-      background: #0056b3;
-    }
-
-    .main-btn:disabled {
-      background-color: #5a6268;
-      cursor: wait;
-    }
-
-    .add-btn {
-      background: var(--success-color);
-    }
-
-    .add-btn:hover {
-      background: #218838;
-    }
-
-    .remove-btn {
-      background: var(--danger-color);
-    }
-
-    .remove-btn:hover {
-      background: #c82333;
-    }
-
-    .dynamic-section {
-      border: 1px solid #ddd;
-      padding: 20px;
       margin-top: 20px;
-      border-radius: 8px;
-      background: #fdfdfd;
-      position: relative;
-    }
-
-    .dynamic-section h4 {
-      margin-top: 0;
-      color: var(--primary-color);
-      border-bottom: 2px solid var(--section-header-bg);
-      padding-bottom: 10px;
-    }
-
-    .dynamic-section .remove-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      padding: 5px 10px;
-      font-size: 12px;
-    }
-
-    .grid {
-      display: grid;
-      gap: 25px;
-    }
-
-    .grid-2 {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .grid-3 {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-
-    small {
-      color: #666;
-      font-size: 12px;
-      display: block;
-      margin-top: 5px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="header">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Securitas_AB_logo.svg/2560px-Securitas_AB_logo.svg.png" alt="Logo de la Compañía">
-      <h1>Sistema de Levantamiento de Vulnerabilidad (SLIS v6.1)</h1>
-      <p>Herramienta Avanzada para el Análisis y Generación de Informes, Mejorada con Complementación IA</p>
-    </div>
-    <form id="vulnForm" onsubmit="return false;">
-      <div class="section-header">I. METADATOS DEL INFORME</div>
-      <div class="form-group grid grid-3">
-        <div><label for="proyecto_nombre">Nombre del Proyecto:</label><input type="text" id="proyecto_nombre" required value="Observatorio Vera C. Rubin">
-        </div>
-        <div><label for="modificacion_nro">Modificación N°:</label><input type="text" id="modificacion_nro" required value="01">
-        </div>
-        <div><label for="fecha_aprobacion">Fecha de Aprobación:</label><input type="date" id="fecha_aprobacion" required>
-        </div>
-      </div>
-      <div class="form-group grid grid-3">
-        <div><label for="generado_por">Generado por (Nombre y Cargo):</label><input type="text" id="generado_por" required value="J. Pérez, Analista de Riesgos">
-        </div>
-        <div><label for="revisado_por">Revisado por (Nombre y Cargo):</label><input type="text" id="revisado_por" required value="M. González, Jefe de Seguridad">
-        </div>
-        <div><label for="aprobado_por">Aprobado por (Nombre y Cargo):</label><input type="text" id="aprobado_por" required value="C. Lorca, Gerente de Proyecto">
-        </div>
-      </div>
-      <div class="section-header">II. DESCRIPCIÓN Y CONTEXTO DEL PROYECTO</div>
-      <div class="form-group">
-        <label for="descripcion_general">Misión y Descripción General del Proyecto:</label><textarea id="descripcion_general" placeholder="Describa la misión principal del proyecto, su importancia estratégica y el estado actual.">El Observatorio Vera C. Rubin, ubicado en Cerro Pachón, Chile, tiene como misión realizar un estudio sin precedentes del cielo mediante un telescopio de 8.4 metros y la cámara digital más grande del mundo. Su importancia estratégica radica en avanzar en la comprensión de la materia oscura, energía oscura y el universo transitorio. Operado por la Asociación de Universidades para la Investigación en Astronomía (AURA) bajo financiamiento NSF-DOE, se espera primera luz en 2025.</textarea>
-      </div>
-      <div class="form-group"><label for="responsable_proyecto">Responsable del Proyecto:</label><input type="text" id="responsable_proyecto" placeholder="Ej: GMTO Corporation" value="Asociación de Universidades para la Investigación en Astronomía (AURA) / NSF-DOE">
-      </div>
-      <div class="section-header">III. ANÁLISIS DEL ENTORNO Y UBICACIÓN</div>
-      <div class="form-group grid grid-3">
-        <div><label for="ubicacion_general">Ubicación (Comuna, Región):</label><input type="text" id="ubicacion_general" placeholder="Ej: La Higuera, Región de Coquimbo" value="La Higuera, Región de Coquimbo, Chile">
-        </div>
-        <div><label for="coordenadas">Coordenadas Geográficas:</label><input type="text" id="coordenadas" placeholder="Ej: 30°14'41''S 70°44'58''O" value="30°14'41''S 70°44'58''O">
-        </div>
-        <div><label for="altitud">Altitud (msnm):</label><input type="number" id="altitud" placeholder="Ej: 2500" value="2682">
-        </div>
-      </div>
-      <div id="rutasAccesoContainer">
-        <h4>Rutas de Acceso y Evacuación</h4>
-      </div>
-      <button type="button" class="add-btn" onclick="addRuta()">+ Añadir Ruta</button>
-      <div class="form-group">
-        <label for="entorno_comunitario">Análisis del Entorno Comunitario y Social:</label><textarea id="entorno_comunitario" placeholder="Describa comunidades cercanas, presencia indígena, incidencia delictual, etc.">La instalación se ubica en una zona de baja densidad poblacional. Las comunidades más cercanas son La Higuera y El Totoral. Se han identificado reclamos históricos de comunidades Diaguitas en la región, con presencia indígena significativa. La incidencia delictual es baja, pero hay riesgos asociados a minería ilegal, aislamiento y una percepción regional de aumento en delitos (88.4% perciben aumento nacional en 2024).</textarea>
-      </div>
-      <div class="form-group">
-        <label for="analisis_delictual">Análisis Cualitativo Delictual (Fuente: Percepción en terreno, complementado con IA)</label>
-        <textarea id="analisis_delictual" placeholder="Ingrese el análisis basado en datos delictuales de la zona...">La comuna de La Higuera presenta una baja densidad delictual, pero el análisis regional para Coquimbo (2024) muestra una tasa de victimización en hogares del 33.8%, con aumento en delitos violentos al 6.6%. Delitos clave: robos (13.5%), hurtos (6.1%), vandalismo (5.9%). La tendencia obliga a considerar riesgos significativos para instalaciones aisladas, pese a la tranquilidad local.</textarea>
-      </div>
-      <div id="infraestructuraCriticaExternaContainer">
-        <h4>Infraestructura Crítica Externa Relevante</h4>
-      </div>
-      <button type="button" class="add-btn" onclick="addInfraExterna()">+ Añadir Infraestructura Externa</button>
-      <div class="section-header">IV. INFRAESTRUCTURA Y ACTIVOS INTERNOS</div>
-      <div id="activosContainer">
-        <h4>Activos Críticos del Proyecto</h4>
-      </div>
-      <button type="button" class="add-btn" onclick="addActivo()">+ Añadir Activo</button>
-      <div id="serviciosCriticosContainer">
-        <h4>Servicios Críticos (Energía, Agua, Datos)</h4>
-      </div>
-      <button type="button" class="add-btn" onclick="addServicio()">+ Añadir Servicio Crítico</button>
-      <div class="section-header">V. ANÁLISIS DE MEDIDAS DE SEGURIDAD ACTUALES</div>
-      <h4>A. Equipo Humano de Seguridad</h4>
-      <div class="form-group grid grid-3">
-        <div><label for="empresa_seguridad">Empresa Prestadora:</label><input type="text" id="empresa_seguridad" value="Securitas Chile S.A.">
-        </div>
-        <div><label for="dotacion_total">Dotación Total:</label><input type="number" id="dotacion_total" placeholder="Nº de guardias y supervisores" value="12">
-        </div>
-        <div><label for="turnos_seguridad">Esquema de Turnos:</label><input type="text" id="turnos_seguridad" placeholder="Ej: 7x7, 12 horas día/noche" value="7x7 rotativo día/noche">
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="info_complementaria_seguridad">Información Complementaria:</label>
-        <textarea id="info_complementaria_seguridad" placeholder="Detalles adicionales sobre el equipo de seguridad (ej. capacitaciones, equipamiento, etc.).">El personal ha recibido formación en primeros auxilios y respuesta a emergencias. Están equipados con radios y linternas de alta potencia. Se realizan patrullajes diurnos y nocturnos.</textarea>
-      </div>
-      <h4>B. Barreras Físicas y Controles de Acceso</h4>
-      <div class="form-group">
-        <label for="cierre_perimetral">Descripción del Cierre Perimetral:</label><textarea id="cierre_perimetral" placeholder="Material, estado, cobertura.">Actualmente no existe un cierre perimetral consolidado en la totalidad del área del proyecto, solo en las zonas de construcción activas. Esto constituye una vulnerabilidad significativa.</textarea>
-      </div>
-      <div id="controlesAccesoContainer">
-        <h4>Puestos de Control de Acceso (Garitas)</h4>
-      </div>
-      <button type="button" class="add-btn" onclick="addControlAcceso()">+ Añadir Puesto de Control</button>
-      <h4>C. Vigilancia Tecnológica (CCTV)</h4>
-      <div id="cctvContainer"></div>
-      <button type="button" class="add-btn" onclick="addCCTV()">+ Añadir Grupo de Cámaras</button>
-      <div class="section-header">VI. ANÁLISIS DE RIESGOS, VULNERABILIDADES Y AMENAZAS</div>
-      <div id="riesgosContainer"></div>
-      <button type="button" class="add-btn" onclick="addRiesgo()">+ Añadir Análisis de Riesgo/Vulnerabilidad</button>
-      <div class="section-header">VII. CONCLUSIÓN GENERAL DE LA MISIÓN</div>
-      <div class="form-group">
-        <label for="conclusion_general">Conclusión General del Nivel de Riesgo:</label><textarea id="conclusion_general" placeholder="Sintetice los hallazgos más críticos y la conclusión final sobre la misión de seguridad.">La postura de seguridad del proyecto es REACTIVA y se considera INADECUADA para el valor estratégico de los activos. La falta de un perímetro robusto, la dependencia de una única ruta de acceso y la exposición a riesgos de intrusión no detectada —agravada por la tendencia delictual regional— elevan el nivel de riesgo general a ALTO. Se requiere una inversión significativa y urgente en medidas de seguridad físicas y tecnológicas para mitigar las vulnerabilidades críticas identificadas y asegurar la viabilidad del proyecto.</textarea>
-      </div>
-      <button type="button" class="main-btn" onclick="generateReport()">Generar Informe Ejecutivo</button>
-    </form>
+
+  <!-- FORMULARIO -->
+  <div class="formulario" id="formularioSLIS">
+    <h2>Formulario de Vulnerabilidad</h2>
+
+    <label for="sitio">Nombre del sitio:</label>
+    <input type="text" id="sitio">
+
+    <label for="responsable">Responsable del informe:</label>
+    <input type="text" id="responsable">
+
+    <label for="entorno">Descripción del entorno:</label>
+    <textarea id="entorno"></textarea>
+
+    <label for="fotoEntorno">Fotografía del entorno:</label>
+    <input type="file" id="fotoEntorno" accept="image/*" onchange="mostrarImagen(event, 'previewEntorno')">
+    <div id="previewEntorno" class="preview-imagen"></div>
+
+    <label for="activos">Activos vulnerables:</label>
+    <textarea id="activos"></textarea>
+
+    <label for="fotoActivos">Fotografía de activos:</label>
+    <input type="file" id="fotoActivos" accept="image/*" onchange="mostrarImagen(event, 'previewActivos')">
+    <div id="previewActivos" class="preview-imagen"></div>
+
+    <label for="hallazgos">Hallazgos:</label>
+    <textarea id="hallazgos"></textarea>
+
+    <label for="fotoHallazgo">Fotografía del hallazgo:</label>
+    <input type="file" id="fotoHallazgo" accept="image/*" onchange="mostrarImagen(event, 'previewHallazgo')">
+    <div id="previewHallazgo" class="preview-imagen"></div>
+
+    <label for="riesgos">Riesgos asociados:</label>
+    <textarea id="riesgos"></textarea>
+
+    <label for="recomendaciones">Recomendaciones:</label>
+    <textarea id="recomendaciones"></textarea>
+
+    <button onclick="generarInforme()">Generar Informe Ejecutivo</button>
   </div>
+
+  <!-- INFORME -->
+  <div id="informeCompleto" style="display:none;">
+    <div class="portada-ejecutiva">
+      <h1>Informe de Vulnerabilidad</h1>
+      <h2>SLIS v6.0</h2>
+      <p><strong>Sitio:</strong> <span id="informeSitio"></span></p>
+      <p><strong>Fecha:</strong> <span id="informeFecha"></span></p>
+      <p><strong>Responsable:</strong> <span id="informeResponsable"></span></p>
+    </div>
+
+    <div id="contenidoInforme"></div>
+
+    <button onclick="descargarPDF()">Descargar Informe en PDF</button>
+  </div>
+
   <script>
-    // --- LÓGICA DEL FORMULARIO DINÁMICO ---
-    let elementCounter = { rutas: 0, infraExterna: 0, activos: 0, servicios: 0, controles: 0, cctv: 0, riesgos: 0 };
-    function createDynamicElement(containerId, index, content) {
-        const container = document.getElementById(containerId);
-        const element = document.createElement('div');
-        element.className = 'dynamic-section';
-        element.id = `${containerId.replace('Container', '')}-${index}`;
-        element.innerHTML = `<button type="button" class="remove-btn" onclick="removeElement('${element.id}')">X</button>${content}`;
-        container.appendChild(element);
+    const imagenes = {};
+
+    function mostrarImagen(event, contenedorId) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagenes[contenedorId] = e.target.result;
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "imagen-informe";
+        document.getElementById(contenedorId).innerHTML = "";
+        document.getElementById(contenedorId).appendChild(img);
+      };
+      if (file) reader.readAsDataURL(file);
     }
-    function addRuta() { 
-        createDynamicElement('rutasAccesoContainer', ++elementCounter.rutas, `<h4>Ruta #${elementCounter.rutas}</h4><div class="grid grid-3"><div class="form-group"><label>Nombre/Tipo:</label><input type="text" class="ruta-nombre" value="Ruta D-445"></div><div class="form-group"><label>Tipo de Vía:</label><input type="text" class="ruta-tipo" value="Pavimentada y ripio"></div><div class="form-group"><label>Tiempo Estimado:</label><input type="text" class="ruta-tiempo" value="2.5 horas desde La Serena"></div></div><div class="form-group"><label>Descripción:</label><textarea class="ruta-desc">Única vía de acceso. Vulnerable a bloqueos por clima o protestas.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="ruta-foto" accept="image/*"></div>`); 
+
+    function generarInforme() {
+      const sitio = document.getElementById("sitio")?.value || "Sin especificar";
+      const responsable = document.getElementById("responsable")?.value || "Sin responsable";
+      const fecha = new Date().toLocaleDateString();
+
+      const entorno = document.getElementById("entorno")?.value || "";
+      const activos = document.getElementById("activos")?.value || "";
+      const hallazgos = document.getElementById("hallazgos")?.value || "";
+      const riesgos = document.getElementById("riesgos")?.value || "";
+      const recomendaciones = document.getElementById("recomendaciones")?.value || "";
+
+      document.getElementById("informeSitio").innerText = sitio;
+      document.getElementById("informeResponsable").innerText = responsable;
+      document.getElementById("informeFecha").innerText = fecha;
+
+      let html = `
+        <h3>Entorno</h3><p>${entorno}</p>${imagenHTML('previewEntorno')}
+        <h3>Activos Vulnerables</h3><p>${activos}</p>${imagenHTML('previewActivos')}
+        <h3>Hallazgos</h3><p>${hallazgos}</p>${imagenHTML('previewHallazgo')}
+        <h3>Riesgos</h3><p>${riesgos}</p>
+        <h3>Recomendaciones</h3><p>${recomendaciones}</p>
+      `;
+
+      document.getElementById("contenidoInforme").innerHTML = html;
+      document.getElementById("formularioSLIS").style.display = "none";
+      document.getElementById("informeCompleto").style.display = "block";
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
-    function addInfraExterna() { 
-        createDynamicElement('infraestructuraCriticaExternaContainer', ++elementCounter.infraExterna, `<h4>Infraestructura Externa #${elementCounter.infraExterna}</h4><div class="grid grid-2"><div class="form-group"><label>Nombre:</label><input type="text" class="infraExterna-nombre" value="Aeropuerto La Florida (La Serena)"></div><div class="form-group"><label>Distancia/Tiempo:</label><input type="text" class="infraExterna-dist" value="100 km / 2.5 horas"></div></div><div class="form-group"><label>Relevancia:</label><textarea class="infraExterna-desc">Punto logístico principal para personal y carga sensible.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="infraExterna-foto" accept="image/*"></div>`); 
+
+    function imagenHTML(id) {
+      return imagenes[id] ? `<img src="${imagenes[id]}" class="imagen-informe">` : "";
     }
-    function addActivo() { 
-        createDynamicElement('activosContainer', ++elementCounter.activos, `<h4>Activo #${elementCounter.activos}</h4><div class="grid grid-2"><div class="form-group"><label>Nombre del Activo:</label><input type="text" class="activo-nombre" value="Espejo Primario del Telescopio"></div><div class="form-group"><label>Estado Actual:</label><input type="text" class="activo-estado" value="En bóveda de almacenamiento"></div></div><div class="form-group"><label>Valor Estratégico:</label><textarea class="activo-desc">Componente más valioso e irremplazable del proyecto. Su daño o robo significaría el fracaso del proyecto.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="activo-foto" accept="image/*"></div>`); 
+
+    function descargarPDF() {
+      const elemento = document.getElementById("informeCompleto");
+      const opciones = {
+        margin: 0.5,
+        filename: 'Informe_SLIS.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opciones).from(elemento).save();
     }
-    function addServicio() { 
-        createDynamicElement('serviciosCriticosContainer', ++elementCounter.servicios, `<h4>Servicio Crítico #${elementCounter.servicios}</h4><div class="form-group"><label>Tipo de Servicio:</label><input type="text" class="servicio-tipo" value="Energía Eléctrica"></div><div class="form-group"><label>Descripción Técnica:</label><textarea class="servicio-desc">Conexión a red eléctrica nacional con respaldo de 3 generadores diésel. La línea es vulnerable a cortes por condiciones climáticas.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="servicio-foto" accept="image/*"></div>`); 
-    }
-    function addControlAcceso() { 
-        createDynamicElement('controlesAccesoContainer', ++elementCounter.controles, `<h4>Puesto de Control #${elementCounter.controles}</h4><div class="grid grid-2"><div class="form-group"><label>Nombre:</label><input type="text" class="control-nombre" value="Garita Principal (Portería)"></div><div class="form-group"><label>Personal Asignado:</label><input type="text" class="control-personal" value="2 Guardias (24/7)"></div></div><div class="form-group"><label>Tareas y Procedimientos:</label><textarea class="control-tareas">Registro de todo el personal, vehículos y materiales. Control de identidad y autorización de ingreso.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="control-foto" accept="image/*"></div>`); 
-    }
-    function addCCTV() { 
-        createDynamicElement('cctvContainer', ++elementCounter.cctv, `<h4>Grupo de Cámaras #${elementCounter.cctv}</h4><div class="grid grid-2"><div class="form-group"><label>Ubicación:</label><input type="text" class="cctv-ubicacion" value="Perímetro del campamento"></div><div class="form-group"><label>Cantidad:</label><input type="number" class="cctv-cantidad" value="16"></div></div><div class="form-group"><label>Observaciones:</label><textarea class="cctv-obs">Cámaras PTZ con visión nocturna, monitoreadas desde sala de control central. No cubren accesos informales.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="cctv-foto" accept="image/*"></div>`); 
-    }
-    function addRiesgo() {
-        const index = ++elementCounter.riesgos;
-        const content = `<h4>Análisis de Riesgo #${index}</h4><div class="form-group"><label>Vulnerabilidad / Amenaza:</label><input type="text" class="riesgo-nombre" value="Intrusión no autorizada por senderos informales"></div><div class="form-group"><label>Descripción del hallazgo:</label><textarea class="riesgo-contexto">Existen múltiples senderos de animales y cazadores en la periferia del proyecto que no están vigilados y bypassean el control de acceso principal.</textarea></div><div class="grid grid-3"><div class="form-group"><label>Probabilidad (1-5):</label><input type="number" class="riesgo-prob" min="1" max="5" value="4" oninput="updateRiskLevel(${index})"><small>1=Rara, 5=Casi Segura</small></div><div class="form-group"><label>Impacto (1-5):</label><input type="number" class="riesgo-imp" min="1" max="5" value="5" oninput="updateRiskLevel(${index})"><small>1=Insignificante, 5=Catastrófico</small></div><div class="form-group"><label>Nivel de Riesgo:</label><input type="text" id="riesgo-nivel-${index}" class="riesgo-nivel" readonly></div></div><div class="form-group"><label>Recomendaciones:</label><textarea class="riesgo-rec">1. Patrullaje motorizado y a pie en rutas perimetrales.\n2. Instalación de sensores de movimiento y cámaras térmicas en puntos clave.\n3. Uso de drones para vigilancia de áreas extensas.</textarea></div><div class="form-group"><label>Fotografía (opcional):</label><input type="file" class="riesgo-foto" accept="image/*"></div>`;
-        createDynamicElement('riesgosContainer', index, content);
-        updateRiskLevel(index);
-    }
-    function removeElement(id) { document.getElementById(id).remove(); }
-    function updateRiskLevel(index) {
-        const probInput = document.querySelector(`#riesgos-${index} .riesgo-prob`);
-        const impInput = document.querySelector(`#riesgos-${index} .riesgo-imp`);
-        const nivelInput = document.getElementById(`riesgo-nivel-${index}`);
-        if (!probInput || !impInput || !nivelInput) return;
-        const prob = parseInt(probInput.value) || 0;
-        const imp = parseInt(impInput.value) || 0;
-        const riskValue = prob * imp;
-        let riskLevel = '';
-        if (riskValue >= 15) riskLevel = 'CRÍTICO';
-        else if (riskValue >= 9) riskLevel = 'ALTO';
-        else if (riskValue >= 5) riskLevel = 'MEDIO';
-        else if (riskValue > 0) riskLevel = 'BAJO';
-        else riskLevel = 'N/A';
-        nivelInput.value = riskLevel;
-    }
-    window.onload = function() { addRuta(); addInfraExterna(); addActivo(); addServicio(); addControlAcceso(); addCCTV(); addRiesgo(); document.getElementById('fecha_aprobacion').valueAsDate = new Date(); };
-    // --- SIMULADOR DE API CEAD, COMPLEMENTADO CON IA (DATOS REALES 2024) ---
-    async function fetchCrimeData(location) {
-        console.log(`Consultando datos delictuales para: ${location} (complementado con IA)`);
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simula retraso
-        const mockData = { // Datos actualizados con info real de INE 2024 para Coquimbo (aproximado para La Higuera)
-            "comuna": "La Higuera", "region": "Coquimbo", "periodo": "2024",
-            "total_delitos": 120, "tasa_regional_promedio": 33.8, "tasa_comunal": 25.0,
-            "conclusion": "La región muestra una victimización en hogares del 33.8% en 2024, con aumento en delitos violentos al 6.6%. En La Higuera, baja densidad pero riesgos en propiedad debido a aislamiento. Tendencia: percepción de aumento en 88.4% de residentes.",
-            "delitos": [
-                { "tipo": "Robos", "casos": 40 }, { "tipo": "Hurtos", "casos": 25 },
-                { "tipo": "Vandalismo", "casos": 20 }, { "tipo": "Ciberdelitos", "casos": 15 }, { "tipo": "Otros", "casos": 20 }
-            ]
-        };
-        // Para integración real con IA: Reemplaza con fetch a una API como Grok o similar: fetch('https://api.x.ai/complement?query=delitos+' + location)
-        return mockData;
-    }
-    // --- MOTOR DE GENERACIÓN DEL INFORME (MEJORADO) ---
-    async function generateReport() {
-        const generateButton = document.querySelector('.main-btn');
-        generateButton.textContent = 'Generando, por favor espere...';
-        generateButton.disabled = true;
-        const reportWindow = window.open('', '_blank');
-        if (!reportWindow || reportWindow.closed || typeof reportWindow.closed == 'undefined') {
-            alert('¡El informe no se pudo abrir!\n\nPor favor, deshabilita el bloqueador de pop-ups.');
-            generateButton.textContent = 'Generar Informe Ejecutivo';
-            generateButton.disabled = false;
-            return;
-        }
-        reportWindow.document.write('<!DOCTYPE html><html><head><title>Generando Informe...</title><style>body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } h1 { color: #333; }</style></head><body><h1>Generando informe, por favor espere...</h1></body></html>');
-        reportWindow.document.close();
-        const reportData = {
-            metadata: {
-                projectName: document.getElementById('proyecto_nombre').value, modification: document.getElementById('modificacion_nro').value, approvalDate: document.getElementById('fecha_aprobacion').value,
-                author: document.getElementById('generado_por').value, reviewer: document.getElementById('revisado_por').value, approver: document.getElementById('aprobado_por').value
-            },
-            projectContext: {
-                description: document.getElementById('descripcion_general').value, owner: document.getElementById('responsable_proyecto').value,
-            },
-            environmentAnalysis: {
-                location: document.getElementById('ubicacion_general').value, coordinates: document.getElementById('coordenadas').value, altitude: document.getElementById('altitud').value,
-                accessRoutes: Array.from(document.querySelectorAll('#rutasAccesoContainer .dynamic-section')).map(el => ({
-                    name: el.querySelector('.ruta-nombre').value, type: el.querySelector('.ruta-tipo').value, time: el.querySelector('.ruta-tiempo').value, description: el.querySelector('.ruta-desc').value,
-                    photo: await getBase64(el.querySelector('.ruta-foto').files[0])
-                })),
-                communityContext: document.getElementById('entorno_comunitario').value, analisisDelictual: document.getElementById('analisis_delictual').value,
-                externalInfrastructure: Array.from(document.querySelectorAll('#infraestructuraCriticaExternaContainer .dynamic-section')).map(el => ({
-                    name: el.querySelector('.infraExterna-nombre').value, distance: el.querySelector('.infraExterna-dist').value, relevance: el.querySelector('.infraExterna-desc').value,
-                    photo: await getBase64(el.querySelector('.infraExterna-foto').files[0])
-                }))
-            },
-            internalAssets: {
-                criticalAssets: Array.from(document.querySelectorAll('#activosContainer .dynamic-section')).map(el => ({
-                    name: el.querySelector('.activo-nombre').value, status: el.querySelector('.activo-estado').value, description: el.querySelector('.activo-desc').value,
-                    photo: await getBase64(el.querySelector('.activo-foto').files[0])
-                })),
-                criticalServices: Array.from(document.querySelectorAll('#serviciosCriticosContainer .dynamic-section')).map(el => ({
-                    type: el.querySelector('.servicio-tipo').value, description: el.querySelector('.servicio-desc').value,
-                    photo: await getBase64(el.querySelector('.servicio-foto').files[0])
-                }))
-            },
-            securityMeasures: {
-                securityTeam: { company: document.getElementById('empresa_seguridad').value, staffCount: document.getElementById('dotacion_total').value, shifts: document.getElementById('turnos_seguridad').value, complementaryInfo: document.getElementById('info_complementaria_seguridad').value },
-                physicalBarriers: {
-                    perimeterFence: document.getElementById('cierre_perimetral').value,
-                    accessControls: Array.from(document.querySelectorAll('#controlesAccesoContainer .dynamic-section')).map(el => ({
-                        name: el.querySelector('.control-nombre').value, staffing: el.querySelector('.control-personal').value, duties: el.querySelector('.control-tareas').value,
-                        photo: await getBase64(el.querySelector('.control-foto').files[0])
-                    }))
-                },
-                cctv: {
-                    cameraGroups: Array.from(document.querySelectorAll('#cctvContainer .dynamic-section')).map(el => ({
-                        location: el.querySelector('.cctv-ubicacion').value, quantity: el.querySelector('.cctv-cantidad').value, observations: el.querySelector('.cctv-obs').value,
-                        photo: await getBase64(el.querySelector('.cctv-foto').files[0])
-                    }))
-                }
-            },
-            riskAnalysis: Array.from(document.querySelectorAll('#riesgosContainer .dynamic-section')).map((el, i) => ({
-                id: i + 1, name: el.querySelector('.riesgo-nombre').value, context: el.querySelector('.riesgo-contexto').value,
-                probability: parseInt(el.querySelector('.riesgo-prob').value), impact: parseInt(el.querySelector('.riesgo-imp').value),
-                level: el.querySelector('.riesgo-nivel').value, recommendations: el.querySelector('.riesgo-rec').value.replace(/\n/g, '<br>'),
-                photo: await getBase64(el.querySelector('.riesgo-foto').files[0])
-            })),
-            conclusion: document.getElementById('conclusion_general').value
-        };
-       
-        const crimeData = await fetchCrimeData(reportData.environmentAnalysis.location).catch(err => {
-            console.error("Error al obtener datos delictuales:", err);
-            return null;
-        });
-        const createTableRows = (data, render) => data.length > 0 ? data.map(render).join('') : `<tr><td colspan="100%">No hay datos registrados.</td></tr>`;
-        const crimeAnalysisHTML = crimeData ? `
-            <h3>Análisis Cuantitativo Delictual (Fuente: CEAD, complementado con IA)</h3>
-            <p>Se ha realizado una consulta a la base de datos para la comuna de ${crimeData.comuna}, Región de ${crimeData.region} durante el período de ${crimeData.periodo}.</p>
-            <div class="chart-container"><canvas id="crimeChart"></canvas></div>
-            <div class="analyst-note" style="background-color: #fff8e1; border-left-color: #ffc107;">
-                <strong>Conclusión:</strong> <p>${crimeData.conclusion}</p>
-            </div>` : `<h3>Análisis Cuantitativo Delictual</h3><p><em>No se pudieron cargar los datos.</em></p>`;
-        const generateRiskMatrixHTML = (risks) => {
-            if (risks.length === 0) return '<p>No se han registrado riesgos.</p>';
-            return `
-                <h4>Matriz de Riesgo</h4>
-                <table>
-                    <thead><tr><th>ID</th><th>Hallazgo</th><th>P</th><th>I</th><th>Nivel</th></tr></thead>
-                    <tbody>${risks.map(r => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.probability}</td><td>${r.impact}</td><td><div class="risk-level risk-${r.level.replace('Í', 'I').replace('í', 'i').replace('Ó', 'O').replace('ó', 'o')}">${r.level}</div></td></tr>`).join('')}</tbody>
-                </table>
-            `;
-        };
-        const generateSummaryTableHTML = (risks) => {
-            if (risks.length === 0) return '<p>No se han registrado recomendaciones.</p>';
-            return `
-                <h4>Recomendaciones Consolidadas</h4>
-                <table>
-                    <thead><tr><th>ID</th><th>Hallazgo</th><th>Recomendaciones</th></tr></thead>
-                    <tbody>${risks.map(r => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.recommendations}</td></tr>`).join('')}</tbody>
-                </table>
-            `;
-        };
-        const generateConclusionHTML = (conclusion) => {
-            return `
-                <div class="analyst-note" style="background-color: #fdeaea; border-left-color: #dc3545;"><p><strong>Resumen de Conclusión:</strong> ${conclusion}</p></div>
-                <p>El nivel de riesgo general es **${conclusion.includes('ALTO') ? 'ALTO' : 'MEDIO'}**.</p>
-            `;
-        };
-        const reportHTML = `
-        <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-            <title>Informe de Vulnerabilidad - ${reportData.metadata.projectName}</title>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Georgia:wght@700&display=swap');
-                :root { --header-font: 'Georgia', 'Times New Roman', serif; --body-font: 'Lato', 'Segoe UI', Arial, sans-serif; --primary-text-color: #1a1a1a; --secondary-text-color: #555; --accent-color: #003366; --border-color: #dee2e6; --bg-light: #f8f9fa; }
-                body { background-color: #fff; color: var(--primary-text-color); font-family: var(--body-font); font-size: 11pt; line-height: 1.6; margin: 0; padding: 25px; }
-                #report-container { max-width: 850px; margin: auto; }
-                h1, h2, h3, h4 { font-family: var(--header-font); color: var(--accent-color); font-weight: bold; margin-top: 2em; margin-bottom: 0.8em; }
-                h1 { font-size: 26pt; text-align: center; border-bottom: 3px solid var(--accent-color); padding-bottom: 15px; margin-top: 0; }
-                h2 { font-size: 18pt; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
-                h3 { font-size: 14pt; } h4 { font-size: 12pt; color: #333; }
-                p, td, th, li, .analyst-note { text-align: justify; margin-bottom: 1em; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 1.5em; page-break-inside: auto; }
-                th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; vertical-align: top; }
-                th { background-color: var(--bg-light); font-weight: bold; width: 25%; }
-                .cover-page { background-color: #002b4e; color: white; text-align: center; padding: 80px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 40px; page-break-after: always; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-                .cover-page h2 { border: none; font-size: 18pt; color: #ffffff; }
-                .analyst-note { background-color: #e7f1ff; border-left: 5px solid var(--accent-color); padding: 20px; margin: 25px 0; font-size: 11pt; font-style: italic; page-break-inside: avoid; }
-                .risk-level { padding: 5px 10px; color: white; border-radius: 4px; text-align: center; font-weight: bold; }
-                .risk-CRÍTICO { background-color: #721c24; } .risk-ALTO { background-color: #dc3545; } .risk-MEDIO { background-color: #ffc107; color: black; } .risk-BAJO { background-color: #28a745; }
-                .chart-container { width: 90%; max-width: 700px; margin: 20px auto; padding: 15px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-                img.report-photo { max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
-                .button-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-                .download-btn { background-color: var(--accent-color); color: white; padding: 12px 22px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-                .download-btn.word { background-color: #2b579a; }
-                .download-btn.pdf { background-color: #d9534f; }
-                .copy-btn { background-color: #007bff; }
-                .copy-btn:hover { background-color: #0056b3; }
-                @media print { .button-container { display: none; } body { padding: 0; } }
-            </style>
-        </head><body>
-            <div class="button-container">
-                <button id="copyBtn" class="download-btn copy-btn" onclick="copyReport()">Copiar Informe</button>
-                <button id="wordBtn" class="download-btn word" onclick="downloadWord()">Descargar como Word</button>
-                <button id="pdfBtn" class="download-btn pdf" onclick="downloadPDF()">Descargar como PDF</button>
-            </div>
-            <div id="report-container">
-                <header class="cover-page">
-                    <h1>Informe Ejecutivo de Análisis de Vulnerabilidad y Riesgos</h1>
-                    <h2>${reportData.metadata.projectName}</h2>
-                    <p><strong>Fecha de Emisión:</strong> ${new Date(reportData.metadata.approvalDate).toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    <p><strong>Modificación N°:</strong> ${reportData.metadata.modification}</p>
-                </header>
-                <h2>I. RESUMEN EJECUTIVO</h2>
-                <div class="analyst-note"><p>Este informe detalla la seguridad del proyecto "${reportData.metadata.projectName}", identificando activos, amenazas y vulnerabilidades, con recomendaciones mitigadoras.</p></div>
-                <h2>II. METADATOS DEL INFORME</h2>
-                <table>
-                    <tr><th>Generado por</th><td>${reportData.metadata.author}</td></tr>
-                    <tr><th>Revisado por</th><td>${reportData.metadata.reviewer}</td></tr>
-                    <tr><th>Aprobado por</th><td>${reportData.metadata.approver}</td></tr>
-                </table>
-                <h2>III. DESCRIPCIÓN Y CONTEXTO DEL PROYECTO</h2>
-                <h3>Misión y Descripción General</h3><p>${reportData.projectContext.description}</p>
-                <h3>Responsable del Proyecto</h3><p>${reportData.projectContext.owner}</p>
-                <h2>IV. ANÁLISIS DEL ENTORNO Y UBICACIÓN</h2>
-                <h3>Ubicación Geográfica</h3>
-                <table>
-                    <tr><th>Ubicación</th><td>${reportData.environmentAnalysis.location}</td></tr>
-                    <tr><th>Coordenadas</th><td>${reportData.environmentAnalysis.coordinates}</td></tr>
-                    <tr><th>Altitud</th><td>${reportData.environmentAnalysis.altitude} msnm</td></tr>
-                </table>
-                <h3>Rutas de Acceso y Evacuación</h3>
-                <table><thead><tr><th>Nombre</th><th>Tipo</th><th>Tiempo</th><th>Descripción</th><th>Foto</th></tr></thead><tbody>${createTableRows(reportData.environmentAnalysis.accessRoutes, r => `<tr><td>${r.name}</td><td>${r.type}</td><td>${r.time}</td><td>${r.description}</td><td>${r.photo ? `<img class="report-photo" src="${r.photo}" alt="Foto de ruta">` : 'N/A'}</td></tr>`)}</tbody></table>
-                <h3>Análisis del Entorno Comunitario</h3><p>${reportData.environmentAnalysis.communityContext}</p>
-                <h3>Análisis Cualitativo Delictual</h3><div class="analyst-note"><p>${reportData.environmentAnalysis.analisisDelictual}</p></div>
-                ${crimeAnalysisHTML}
-                <h3>Infraestructura Crítica Externa</h3>
-                <table><thead><tr><th>Nombre</th><th>Distancia</th><th>Relevancia</th><th>Foto</th></tr></thead><tbody>${createTableRows(reportData.environmentAnalysis.externalInfrastructure, i => `<tr><td>${i.name}</td><td>${i.distance}</td><td>${i.relevance}</td><td>${i.photo ? `<img class="report-photo" src="${i.photo}" alt="Foto de infra">` : 'N/A'}</td></tr>`)}</tbody></table>
-                <h2>V. INFRAESTRUCTURA Y ACTIVOS INTERNOS</h2>
-                <h3>Activos Críticos</h3>
-                <table><thead><tr><th>Nombre</th><th>Estado</th><th>Valor</th><th>Foto</th></tr></thead><tbody>${createTableRows(reportData.internalAssets.criticalAssets, a => `<tr><td>${a.name}</td><td>${a.status}</td><td>${a.description}</td><td>${a.photo ? `<img class="report-photo" src="${a.photo}" alt="Foto de activo">` : 'N/A'}</td></tr>`)}</tbody></table>
-                <h3>Servicios Críticos</h3>
-                <table><thead><tr><th>Tipo</th><th>Descripción</th><th>Foto</th></tr></thead><tbody>${createTableRows(reportData.internalAssets.criticalServices, s => `<tr><td>${s.type}</td><td>${s.description}</td><td>${s.photo ? `<img class="report-photo" src="${s.photo}" alt="Foto de servicio">` : 'N/A'}</td></tr>`)}</tbody></table>
-                <h2>VI. MEDIDAS DE SEGURIDAD ACTUALES</h2>
-                <h3>A. Equipo de Seguridad</h3>
-                <table>
-                    <tr><th>Empresa</th><td>${reportData.securityMeasures.securityTeam.company}</td></tr>
-                    <tr><th>Dotación</th><td>${reportData.securityMeasures.securityTeam.staffCount}</td></tr>
-                    <tr><th>Turnos</th><td>${reportData.securityMeasures.securityTeam.shifts}</td></tr>
-                   <tr><th>Info Complementaria</th><td>${reportData.securityMeasures.securityTeam.complementaryInfo}</td></tr>
-                </table>
-                <h3>B. Barreras Físicas</h3>
-                <h4>Cierre Perimetral</h4><p>${reportData.securityMeasures.physicalBarriers.perimeterFence}</p>
-                <h4>Puestos de Control</h4>
-                <table><thead><tr><th>Nombre</th><th>Personal</th><th>Tareas</th><th>Foto</th></tr></thead><tbody>${createTableRows(reportData.securityMeasures.physicalBarriers.accessControls, c => `<tr><td>${c.name}</td><td>${c.staffing}</td><td>${c.duties}</td><td>${c.photo ? `<img class="report-photo" src="${c.photo}" alt="Foto de control">` : 'N/A'}</td></tr>`)}</tbody></table>
-                <h3>C. Vigilancia CCTV</h3>
-                <table><thead><tr><th>Ubicación</th><th>Cantidad</th><th>Observaciones</th><th>Foto</th></tr></thead><tbody>${createTableRows(reportData.securityMeasures.cctv.cameraGroups, c => `<tr><td>${c.location}</td><td>${c.quantity}</td><td>${c.observations}</td><td>${c.photo ? `<img class="report-photo" src="${c.photo}" alt="Foto de CCTV">` : 'N/A'}</td></tr>`)}</tbody></table>
-                <h2>VII. ANÁLISIS DE RIESGOS</h2>
-                <table>
-                    <thead><tr><th>ID</th><th>Amenaza</th><th>Descripción</th><th>Prob.</th><th>Imp.</th><th>Nivel</th><th>Foto</th></tr></thead>
-                    <tbody>${createTableRows(reportData.riskAnalysis, r => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.context}</td><td>${r.probability}</td><td>${r.impact}</td><td><div class="risk-level risk-${r.level.replace('Í', 'I').replace('í', 'i').replace('Ó', 'O').replace('ó', 'o')}">${r.level}</div></td><td>${r.photo ? `<img class="report-photo" src="${r.photo}" alt="Foto de riesgo">` : 'N/A'}</td></tr>`)}</tbody>
-                </table>
-                ${generateRiskMatrixHTML(reportData.riskAnalysis)}
-                <h2>VIII. RECOMENDACIONES</h2>
-                ${generateSummaryTableHTML(reportData.riskAnalysis)}
-                <h2>IX. CONCLUSIÓN FINAL</h2>
-                ${generateConclusionHTML(reportData.conclusion)}
-            </div>
-        </body>
-        <script>
-            // Función para convertir file a base64 (para fotos)
-            async function getBase64(file) {
-                if (!file) return null;
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                });
-            }
-            // Inicializar chart si hay datos
-            const ctx = document.getElementById('crimeChart');
-            if (ctx) {
-                new Chart(ctx.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ${JSON.stringify(crimeData ? crimeData.delitos.map(d => d.tipo) : [])},
-                        datasets: [{ data: ${JSON.stringify(crimeData ? crimeData.delitos.map(d => d.casos) : [])}, backgroundColor: ['#b2182b', '#d6604d', '#f4a582', '#fddbc7', '#d1e5f0'] }]
-                    },
-                    options: { plugins: { title: { display: true, text: 'Distribución de Delitos' } } }
-                });
-            }
-            // Función copiar (adaptada)
-            async function copyReport() {
-                const copyButton = document.getElementById('copyBtn');
-                copyButton.textContent = 'Copiando...'; copyButton.disabled = true;
-                const container = document.getElementById('report-container');
-                navigator.clipboard.writeText(container.innerHTML).then(() => {
-                    copyButton.textContent = '¡Copiado!';
-                    setTimeout(() => { copyButton.textContent = 'Copiar Informe'; copyButton.disabled = false; }, 2000);
-                });
-            }
-            // Función Word (adaptada)
-            function downloadWord() {
-                const wordButton = document.getElementById('wordBtn');
-                wordButton.textContent = 'Preparando...'; wordButton.disabled = true;
-                const container = document.getElementById('report-container');
-                const header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Informe</title></head><body>';
-                const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(header + container.innerHTML + '</body></html>');
-                const a = document.createElement('a');
-                a.href = source;
-                a.download = 'Informe_${reportData.metadata.projectName}.doc';
-                a.click();
-                wordButton.textContent = 'Descargar como Word'; wordButton.disabled = false;
-            }
-            // Nueva función PDF
-            function downloadPDF() {
-                const pdfButton = document.getElementById('pdfBtn');
-                pdfButton.textContent = 'Generando PDF...'; pdfButton.disabled = true;
-                const element = document.getElementById('report-container');
-                html2pdf().from(element).set({
-                    margin: 1,
-                    filename: 'Informe_${reportData.metadata.projectName}.pdf',
-                    html2canvas: { scale: 2 },
-                    jsPDF: { orientation: 'portrait', unit: 'in', format: 'letter', compressPDF: true }
-                }).save().then(() => {
-                    pdfButton.textContent = 'Descargar como PDF'; pdfButton.disabled = false;
-                });
-            }
   </script>
-
-</html>`;
-
-reportWindow.document.open();
-reportWindow.document.write(reportHTML);
-reportWindow.document.close();
-generateButton.textContent = 'Generar Informe Ejecutivo';
-generateButton.disabled = false;
-}
-// Función helper para base64 (usada en reportData)
-function getBase64(file) {
-return new Promise((resolve, reject) => {
-if (!file) return resolve(null);
-const reader = new FileReader();
-reader.readAsDataURL(file);
-reader.onload = () => resolve(reader.result);
-reader.onerror = error => reject(error);
-});
-}
-</script>
 </body>
 
 </html>
