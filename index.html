@@ -31,7 +31,7 @@
       margin-bottom: 20px;
     }
 
-    .item-formulario {
+    .formulario {
       background: white;
       padding: 20px;
       margin-bottom: 20px;
@@ -46,9 +46,13 @@
     }
 
     textarea,
-    input[type="file"] {
+    input[type="file"],
+    input[type="text"] {
       width: 100%;
       margin-top: 5px;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
 
     .preview-imagen img,
@@ -86,14 +90,21 @@
 
 <body>
 
-  <!-- FORMULARIO -->
-  <div class="item-formulario">
+  <!-- FORMULARIO COMPLETO -->
+  <div class="formulario" id="formularioSLIS">
+    <h2>Formulario de Vulnerabilidad</h2>
+
+    <label for="sitio">Nombre del sitio:</label>
+    <input type="text" id="sitio">
+
+    <label for="responsable">Responsable del informe:</label>
+    <input type="text" id="responsable">
+
     <label for="descripcion">Descripción del hallazgo:</label>
-    <textarea id="descripcion" name="descripcion"></textarea>
+    <textarea id="descripcion"></textarea>
 
     <label for="fotoHallazgo">Fotografía del hallazgo:</label>
     <input type="file" id="fotoHallazgo" accept="image/*" onchange="mostrarImagen(event, 'previewHallazgo')">
-
     <div id="previewHallazgo" class="preview-imagen"></div>
 
     <button onclick="generarInforme()">Generar Informe</button>
@@ -104,9 +115,9 @@
     <div class="portada-ejecutiva">
       <h1>Informe de Vulnerabilidad</h1>
       <h2>SLIS v6.0</h2>
-      <p><strong>Sitio:</strong> Instalación Central</p>
-      <p><strong>Fecha:</strong> 03/09/2025</p>
-      <p><strong>Responsable:</strong> Rodrigo</p>
+      <p><strong>Sitio:</strong> <span id="informeSitio"></span></p>
+      <p><strong>Fecha:</strong> <span id="informeFecha"></span></p>
+      <p><strong>Responsable:</strong> <span id="informeResponsable"></span></p>
     </div>
 
     <h3>Hallazgos</h3>
@@ -116,9 +127,7 @@
     <button onclick="descargarPDF()">Descargar PDF</button>
   </div>
 
-  <!-- LIBRERÍA PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
   <script>
     let imagenBase64 = "";
 
@@ -137,7 +146,14 @@
   }
 
   function generarInforme() {
+    const sitio = document.getElementById("sitio").value;
+    const responsable = document.getElementById("responsable").value;
     const descripcion = document.getElementById("descripcion").value;
+    const fecha = new Date().toLocaleDateString();
+
+    document.getElementById("informeSitio").innerText = sitio;
+    document.getElementById("informeResponsable").innerText = responsable;
+    document.getElementById("informeFecha").innerText = fecha;
     document.getElementById("textoHallazgo").innerText = descripcion;
 
     if (imagenBase64) {
@@ -148,6 +164,7 @@
       document.getElementById("imagenHallazgo").appendChild(img);
     }
 
+    document.getElementById("formularioSLIS").style.display = "none";
     document.getElementById("informeCompleto").style.display = "block";
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
